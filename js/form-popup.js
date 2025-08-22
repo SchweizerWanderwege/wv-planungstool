@@ -8,22 +8,23 @@ export function showForm(pixelCoord, lonLat){
     <div class="form-popup">
       <input id="Titel" placeholder="Titel">
       <select id="Typ">
-        <option value="Rundwanderung">Rundwanderung</option>
-        <option value="Tagestour">Tagestour</option>
-        <option value="Mehrtagestour">Mehrtagestour</option>
+        <option value="Magazin">Magazin</option>
+        <option value="broschuere">Broschüre</option>
+        <option value="web">Web-WV</option>
       </select>
       <select id="Kategorie">
-        <option value="hike">Hike</option>
-        <option value="mountain hike">Mountain Hike</option>
-        <option value="alpine hike">Alpine Hike</option>
-        <option value="winter hike">Winter Hike</option>
-        <option value="snowshoe hike">Snowshoe Hike</option>
+        <option value="hike">Waanderung</option>
+        <option value="mountain hike">Bergwanderung</option>
+        <option value="alpine hike">Alpinwanderung</option>
+        <option value="winter hike">Winterwanderung</option>
+        <option value="snowshoe hike">Schneeschuhwanderung</option>
       </select>
       <input id="Ausgabe" placeholder="Ausgabe">
       <select id="Jahr">
         <option value="${currentYear-1}">${currentYear-1}</option>
         <option value="${currentYear}">${currentYear}</option>
         <option value="${currentYear+1}">${currentYear+1}</option>
+        <option value="${currentYear+2}">${currentYear+2}</option>
       </select>
       <textarea id="Bemerkungen" placeholder="Bemerkungen"></textarea>
       <button id="saveBtn">Speichern</button>
