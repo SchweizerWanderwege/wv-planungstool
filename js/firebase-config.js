@@ -3,7 +3,7 @@ import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebas
 import { getDatabase } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
 
 // --- Firebase config ---
-const firebaseConfig = {
+export const firebaseConfig = {
   apiKey: "AIzaSyDG-B0RENmdHuZ5wkwnA7_CK3If8dRHGEY",
   authDomain: "wv-planungstool.firebaseapp.com",
   projectId: "wv-planungstool",
@@ -16,3 +16,4 @@ const firebaseConfig = {
 
 export const app = initializeApp(firebaseConfig);
 export const db = getDatabase(app);
+
