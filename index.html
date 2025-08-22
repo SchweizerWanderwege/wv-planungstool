@@ -2,21 +2,30 @@
 <html lang="de">
 <head>
 <meta charset="UTF-8">
-<title>Live Punkte Erfassen</title>
-<link rel="stylesheet" href="css/style.css">
+<title>WV-Planungstool SWW V0.1</title>
+<!-- OpenLayers UMD Version -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/ol@latest/ol.css">
+<script src="https://cdn.jsdelivr.net/npm/ol@latest/dist/ol.js"></script>
+<!-- Eigenes CSS -->
+<link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
 <div id="map"></div>
 
-<script type="module">
-import './js/firebase-config.js';
-import './js/map-init.js';
-import './js/firebase-points.js';
-import './js/form-popup.js';
-import './js/popup-handler.js';
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js"></script>
 
-import { loadPoints } from './js/firebase-points.js';
-loadPoints();
+<!-- Eigene JS Dateien -->
+<script src="./js/firebase-config.js"></script>
+<script src="./js/map-init.js"></script>
+<script src="./js/firebase-points.js"></script>
+<script src="./js/form-popup.js"></script>
+<script src="./js/popup-handler.js"></script>
+
+<script>
+  // Punkte direkt laden
+  loadPoints();
 </script>
 </body>
 </html>
