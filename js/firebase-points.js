@@ -2,6 +2,9 @@
 import { ref, push, onValue, remove } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
 import { db } from "./firebase-config.js";
 import { vectorSource } from "./map-init.js";
+import Feature from 'https://cdn.jsdelivr.net/npm/ol@latest/Feature.js';
+import Point from 'https://cdn.jsdelivr.net/npm/ol@latest/geom/Point.js';
+import { fromLonLat } from 'https://cdn.jsdelivr.net/npm/ol@latest/proj.js';
 
 export const pointsRef = ref(db, 'punkte');
 
@@ -11,8 +14,8 @@ export function loadPoints() {
     const data = snapshot.val();
     if(data){
       Object.entries(data).forEach(([key, p]) => {
-        const f = new ol.Feature({
-          geometry: new ol.geom.Point(ol.proj.fromLonLat([parseFloat(p.lon), parseFloat(p.lat)])),
+        const f = new Feature({
+          geometry: new Point(fromLonLat([parseFloat(p.lon), parseFloat(p.lat)])),
           attributes: { ...p, _firebaseKey: key }
         });
         vectorSource.addFeature(f);
@@ -28,3 +31,4 @@ export function savePoint(point){
 export function deletePoint(key){
   remove(ref(db, 'punkte/' + key));
 }
+
