@@ -1,50 +1,37 @@
 // js/map-init.js
 
-// --- OpenLayers Modular Imports ---
-import Map from 'https://cdn.jsdelivr.net/npm/ol@latest/Map.js';
-import View from 'https://cdn.jsdelivr.net/npm/ol@latest/View.js';
-import TileLayer from 'https://cdn.jsdelivr.net/npm/ol@latest/layer/Tile.js';
-import VectorLayer from 'https://cdn.jsdelivr.net/npm/ol@latest/layer/Vector.js';
-import OSM from 'https://cdn.jsdelivr.net/npm/ol@latest/source/OSM.js';
-import VectorSource from 'https://cdn.jsdelivr.net/npm/ol@latest/source/Vector.js';
-import Feature from 'https://cdn.jsdelivr.net/npm/ol@latest/Feature.js';
-import Point from 'https://cdn.jsdelivr.net/npm/ol@latest/geom/Point.js';
-import { Style, Fill, Stroke } from 'https://cdn.jsdelivr.net/npm/ol@latest/style.js';
-import CircleStyle from 'https://cdn.jsdelivr.net/npm/ol@latest/style/Circle.js';
-import Overlay from 'https://cdn.jsdelivr.net/npm/ol@latest/Overlay.js';
+// Vector Source & Layer
+vectorSource = new ol.source.Vector();
 
-// --- Vector Source & Layer ---
-export const vectorSource = new VectorSource();
-
-export const vectorLayer = new VectorLayer({
+vectorLayer = new ol.layer.Vector({
   source: vectorSource,
-  style: new Style({
-    image: new CircleStyle({
+  style: new ol.style.Style({
+    image: new ol.style.Circle({
       radius: 7,
-      fill: new Fill({ color: 'blue' }),
-      stroke: new Stroke({ color: 'white', width: 2 })
+      fill: new ol.style.Fill({ color: 'blue' }),
+      stroke: new ol.style.Stroke({ color: 'white', width: 2 })
     })
   })
 });
 
-// --- Map ---
-export const map = new Map({
+// Map
+map = new ol.Map({
   target: 'map',
   layers: [
-    new TileLayer({ source: new OSM() }),
+    new ol.layer.Tile({ source: new ol.source.OSM() }),
     vectorLayer
   ],
-  view: new View({
-    center: ol.proj.fromLonLat([8.3, 46.8]), // Schweiz-Mittelpunkt
+  view: new ol.View({
+    center: ol.proj.fromLonLat([8.3, 46.8]),
     zoom: 8
   })
 });
 
-// --- Popup Overlay ---
-export const popup = document.createElement('div');
+// Popup Overlay
+popup = document.createElement('div');
 popup.className = 'popup';
 
-export const overlay = new Overlay({
+overlay = new ol.Overlay({
   element: popup,
   positioning: 'bottom-center',
   stopEvent: true,
