@@ -1,32 +1,30 @@
 // js/form-popup.js
-import { savePoint } from "./firebase-points.js";
-import { overlay } from "./map-init.js";
 
-export function showForm(pixelCoord, lonLat){
+function showForm(pixelCoord, lonLat){
   const currentYear = new Date().getFullYear();
   overlay.getElement().innerHTML = `
     <div class="form-popup">
-      <input id="Titel" placeholder="Titel">
+      <input id="Titel" placeholder="Titel"><br>
       <select id="Typ">
-        <option value="Magazin">Magazin</option>
-        <option value="broschuere">Broschüre</option>
-        <option value="web">Web-WV</option>
-      </select>
+        <option value="Magazin">^Magazin</option>
+        <option value="Broschüre">Broschüre</option>
+        <option value="Web-WV">Web-WV</option>
+      </select><br>
       <select id="Kategorie">
-        <option value="hike">Waanderung</option>
+        <option value="hike">Wanderung</option>
         <option value="mountain hike">Bergwanderung</option>
         <option value="alpine hike">Alpinwanderung</option>
         <option value="winter hike">Winterwanderung</option>
         <option value="snowshoe hike">Schneeschuhwanderung</option>
-      </select>
-      <input id="Ausgabe" placeholder="Ausgabe">
+      </select><br>
+      <input id="Ausgabe" placeholder="Ausgabe"><br>
       <select id="Jahr">
         <option value="${currentYear-1}">${currentYear-1}</option>
         <option value="${currentYear}">${currentYear}</option>
         <option value="${currentYear+1}">${currentYear+1}</option>
         <option value="${currentYear+2}">${currentYear+2}</option>
-      </select>
-      <textarea id="Bemerkungen" placeholder="Bemerkungen"></textarea>
+      </select><br>
+      <textarea id="Bemerkungen" placeholder="Bemerkungen"></textarea><br>
       <button id="saveBtn">Speichern</button>
     </div>
   `;

@@ -1,9 +1,7 @@
 // js/firebase-config.js
-import { initializeApp } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-app.js";
-import { getDatabase } from "https://www.gstatic.com/firebasejs/10.5.0/firebase-database.js";
 
 // --- Firebase config ---
-export const firebaseConfig = {
+const firebaseConfig = {
   apiKey: "AIzaSyDG-B0RENmdHuZ5wkwnA7_CK3If8dRHGEY",
   authDomain: "wv-planungstool.firebaseapp.com",
   projectId: "wv-planungstool",
@@ -14,6 +12,5 @@ export const firebaseConfig = {
   databaseURL: "https://wv-planungstool-default-rtdb.europe-west1.firebasedatabase.app"
 };
 
-export const app = initializeApp(firebaseConfig);
-export const db = getDatabase(app);
-
+firebase.initializeApp(firebaseConfig);
+const db = firebase.database();
