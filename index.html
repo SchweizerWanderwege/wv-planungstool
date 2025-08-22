@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<title>Live Punkte Erfassen</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="map"></div>
+
+<script type="module">
+import './js/firebase-config.js';
+import './js/map-init.js';
+import './js/firebase-points.js';
+import './js/form-popup.js';
+import './js/popup-handler.js';
+
+// Punkte laden
+import { loadPoints } from './js/firebase-points.js';
+loadPoints();
+</script>
+</body>
+</html>
