@@ -13,8 +13,11 @@
 <link rel="stylesheet" href="./css/style.css">
 </head>
 <body>
-<div id="map" style="width:70vw; height:100vh; float:left;"></div>
-<div id="filters" style="width:30vw; float:left;"></div>
+<div style="display: flex; height: 100vh;">
+  <div id="map" style="flex: 1; height: 100%;"></div>
+  <div id="filters" style="width: 300px; padding: 10px; overflow-y: auto; background: #fff;"></div>
+</div>
+
 
 <!-- Eigene JS Dateien -->
 <script src="./js/firebase-config.js"></script>
@@ -29,5 +32,6 @@
 </script>
 </body>
 </html>
+
 
 
