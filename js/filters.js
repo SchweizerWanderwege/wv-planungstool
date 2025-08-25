@@ -7,7 +7,6 @@ function minutesToHHMM(minutes) {
   return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
 }
 
-// Globale Funktion
 function initFilters(source, layer) {
   const filterContainer = document.getElementById('filters');
   if (!filterContainer) return;
@@ -18,12 +17,13 @@ function initFilters(source, layer) {
     const features = source.getFeatures();
     if (!features.length) return;
 
-    filterContainer.innerHTML = ''; // Clear previous content
+    console.log(features[0].getProperties()); // Prüfe Feldnamen
+    filterContainer.innerHTML = ''; // alte Filter löschen
 
-    // ---- Config für alle Filter ----
+    // ---- Filter-Config ----
     const filtersConfig = [
-      { attr: 'category', type: 'checkbox', options: [...new Set(features.map(f => f.get('category')))] },
-      { attr: 'physical_demand', type: 'checkbox', options: [...new Set(features.map(f => f.get('physical_demand')))] },
+      { attr: 'category', type: 'checkbox', options: [...new Set(features.map(f => f.get('category'))).values()] },
+      { attr: 'physical_demand', type: 'checkbox', options: [...new Set(features.map(f => f.get('physical_demand'))).values()] },
       { attr: 'active', type: 'boolean' },
       { attr: 'listed', type: 'boolean' },
       { attr: 'hiking_time', type: 'range' },
@@ -41,6 +41,7 @@ function initFilters(source, layer) {
 
       let inputContainer;
 
+      // ---- Checkboxen (Strings) ----
       if (cfg.type === 'checkbox') {
         inputContainer = document.createElement('div');
         inputContainer.className = 'filter-options';
@@ -55,7 +56,11 @@ function initFilters(source, layer) {
           optLabel.appendChild(document.createTextNode(opt));
           inputContainer.appendChild(optLabel);
         });
-      } else if (cfg.type === 'boolean') {
+        inputs[cfg.attr] = inputContainer.querySelectorAll('input[type=checkbox]');
+      }
+
+      // ---- Boolean ----
+      else if (cfg.type === 'boolean') {
         inputContainer = document.createElement('div');
         const trueLabel = document.createElement('label');
         trueLabel.style.marginRight = '10px';
@@ -65,6 +70,7 @@ function initFilters(source, layer) {
         cbTrue.addEventListener('change', () => applyFilters(source, layer, inputs, filtersConfig));
         trueLabel.appendChild(cbTrue);
         trueLabel.appendChild(document.createTextNode('true'));
+
         const falseLabel = document.createElement('label');
         const cbFalse = document.createElement('input');
         cbFalse.type = 'checkbox';
@@ -72,10 +78,15 @@ function initFilters(source, layer) {
         cbFalse.addEventListener('change', () => applyFilters(source, layer, inputs, filtersConfig));
         falseLabel.appendChild(cbFalse);
         falseLabel.appendChild(document.createTextNode('false'));
+
         inputContainer.appendChild(trueLabel);
         inputContainer.appendChild(falseLabel);
+
         inputs[cfg.attr] = { true: cbTrue, false: cbFalse };
-      } else if (cfg.type === 'range') {
+      }
+
+      // ---- Min/Max Slider ----
+      else if (cfg.type === 'range') {
         const values = features.map(f => f.get(cfg.attr)).filter(v => v != null);
         const min = Math.min(...values);
         const max = Math.max(...values);
@@ -97,7 +108,6 @@ function initFilters(source, layer) {
 
         const minLabel = document.createElement('span');
         const maxLabel = document.createElement('span');
-
         if (cfg.attr === 'hiking_time') {
           minLabel.textContent = minutesToHHMM(minInput.value);
           maxLabel.textContent = minutesToHHMM(maxInput.value);
@@ -124,11 +134,10 @@ function initFilters(source, layer) {
         rangeContainer.appendChild(maxLabel);
 
         inputContainer = rangeContainer;
-        inputs[cfg.attr] = { min: minInput, max: maxInput };
+        inputs[cfg.attr] = { min: minInput, max: maxInput, fullMin: min, fullMax: max };
       }
 
       filterContainer.appendChild(inputContainer);
-      if (cfg.type === 'checkbox') inputs[cfg.attr] = inputContainer.querySelectorAll('input[type=checkbox]');
     });
 
     // ---- Reset Button ----
@@ -136,7 +145,6 @@ function initFilters(source, layer) {
     resetBtn.textContent = 'Reset';
     resetBtn.style.marginTop = '10px';
     resetBtn.addEventListener('click', () => {
-      // Checkboxen zurücksetzen
       Object.keys(inputs).forEach(attr => {
         if (inputs[attr] instanceof NodeList) {
           inputs[attr].forEach(cb => cb.checked = false);
@@ -144,16 +152,13 @@ function initFilters(source, layer) {
           inputs[attr].true.checked = false;
           inputs[attr].false.checked = false;
         } else if (inputs[attr].min && inputs[attr].max) {
-          const min = Number(inputs[attr].min.min);
-          const max = Number(inputs[attr].max.max);
-          inputs[attr].min.value = min;
-          inputs[attr].max.value = max;
-          if (attr === 'hiking_time') {
-            inputs[attr].min.nextSibling.textContent = minutesToHHMM(min);
-            inputs[attr].max.nextSibling.textContent = minutesToHHMM(max);
-          } else {
-            inputs[attr].min.nextSibling.textContent = min;
-            inputs[attr].max.nextSibling.textContent = max;
+          inputs[attr].min.value = inputs[attr].fullMin;
+          inputs[attr].max.value = inputs[attr].fullMax;
+          const minLabel = inputs[attr].min.nextSibling;
+          const maxLabel = inputs[attr].max.nextSibling;
+          if (minLabel && maxLabel) {
+            minLabel.textContent = attr === 'hiking_time' ? minutesToHHMM(inputs[attr].fullMin) : inputs[attr].fullMin;
+            maxLabel.textContent = attr === 'hiking_time' ? minutesToHHMM(inputs[attr].fullMax) : inputs[attr].fullMax;
           }
         }
       });
@@ -173,25 +178,28 @@ function applyFilters(source, layer, inputs, config) {
     config.forEach(cfg => {
       const featureVal = f.get(cfg.attr);
 
+      // ---- Checkboxen ----
       if (cfg.type === 'checkbox') {
         const checkedBoxes = Array.from(inputs[cfg.attr]).filter(cb => cb.checked).map(cb => cb.value);
         if (checkedBoxes.length > 0 && !checkedBoxes.includes(featureVal)) visible = false;
       }
 
-      if (cfg.type === 'boolean') {
+      // ---- Boolean ----
+      else if (cfg.type === 'boolean') {
         const checkedTrue = inputs[cfg.attr].true.checked;
         const checkedFalse = inputs[cfg.attr].false.checked;
 
-        if (!checkedTrue && !checkedFalse) return; // keine Auswahl = alles sichtbar
+        if (!checkedTrue && !checkedFalse) return; // keine Auswahl = alle sichtbar
 
         if (featureVal === 1 && !checkedTrue) visible = false;
         if (featureVal === 0 && !checkedFalse) visible = false;
       }
 
-      if (cfg.type === 'range') {
+      // ---- Range ----
+      else if (cfg.type === 'range') {
         const min = Number(inputs[cfg.attr].min.value);
         const max = Number(inputs[cfg.attr].max.value);
-        if (featureVal == null || featureVal < min || featureVal > max) visible = false;
+        if ((featureVal != null) && (featureVal < min || featureVal > max)) visible = false;
       }
     });
 
