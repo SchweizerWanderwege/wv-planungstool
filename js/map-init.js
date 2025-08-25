@@ -37,16 +37,13 @@ map = new ol.Map({
   target: 'map',
   layers: [
     new ol.layer.Tile({ source: new ol.source.OSM() }),
-    vectorLayer
+    vectorLayer, geojsonLayer
   ],
   view: new ol.View({
     center: ol.proj.fromLonLat([8.3, 46.8]),
     zoom: 8
   })
 });
-
-// Add the new layer to the map (after the base and before overlays)
-map.addLayer(geojsonLayer);
 
 // Popup Overlay
 popup = document.createElement('div');
@@ -60,5 +57,6 @@ overlay = new ol.Overlay({
 });
 
 map.addOverlay(overlay);
+
 
 
