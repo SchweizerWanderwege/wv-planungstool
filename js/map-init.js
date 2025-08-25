@@ -26,13 +26,10 @@ const geojsonLayer = new ol.layer.Vector({
   style: new ol.style.Style({
     stroke: new ol.style.Stroke({
       color: 'red',
-      width: 2
+      width: 4
     })
   })
 });
-
-// Add the new layer to the map (after the base and before overlays)
-map.addLayer(geojsonLayer);
 
 
 // Map
@@ -48,6 +45,9 @@ map = new ol.Map({
   })
 });
 
+// Add the new layer to the map (after the base and before overlays)
+map.addLayer(geojsonLayer);
+
 // Popup Overlay
 popup = document.createElement('div');
 popup.className = 'popup';
@@ -60,4 +60,5 @@ overlay = new ol.Overlay({
 });
 
 map.addOverlay(overlay);
+
 
