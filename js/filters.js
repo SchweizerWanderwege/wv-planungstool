@@ -18,6 +18,8 @@ function initFilters(source, layer) {
     const features = source.getFeatures();
     if (!features.length) return;
 
+    filterContainer.innerHTML = ''; // Clear previous content
+
     // ---- Config für alle Filter ----
     const filtersConfig = [
       { attr: 'category', type: 'checkbox', options: [...new Set(features.map(f => f.get('category')))] },
@@ -128,10 +130,40 @@ function initFilters(source, layer) {
       filterContainer.appendChild(inputContainer);
       if (cfg.type === 'checkbox') inputs[cfg.attr] = inputContainer.querySelectorAll('input[type=checkbox]');
     });
+
+    // ---- Reset Button ----
+    const resetBtn = document.createElement('button');
+    resetBtn.textContent = 'Reset';
+    resetBtn.style.marginTop = '10px';
+    resetBtn.addEventListener('click', () => {
+      // Checkboxen zurücksetzen
+      Object.keys(inputs).forEach(attr => {
+        if (inputs[attr] instanceof NodeList) {
+          inputs[attr].forEach(cb => cb.checked = false);
+        } else if (inputs[attr].true && inputs[attr].false) {
+          inputs[attr].true.checked = false;
+          inputs[attr].false.checked = false;
+        } else if (inputs[attr].min && inputs[attr].max) {
+          const min = Number(inputs[attr].min.min);
+          const max = Number(inputs[attr].max.max);
+          inputs[attr].min.value = min;
+          inputs[attr].max.value = max;
+          if (attr === 'hiking_time') {
+            inputs[attr].min.nextSibling.textContent = minutesToHHMM(min);
+            inputs[attr].max.nextSibling.textContent = minutesToHHMM(max);
+          } else {
+            inputs[attr].min.nextSibling.textContent = min;
+            inputs[attr].max.nextSibling.textContent = max;
+          }
+        }
+      });
+      applyFilters(source, layer, inputs, filtersConfig);
+    });
+    filterContainer.appendChild(resetBtn);
   });
 }
 
-// Filter anwenden
+// ---- Filter anwenden ----
 function applyFilters(source, layer, inputs, config) {
   const features = source.getFeatures();
 
@@ -143,17 +175,19 @@ function applyFilters(source, layer, inputs, config) {
 
       if (cfg.type === 'checkbox') {
         const checkedBoxes = Array.from(inputs[cfg.attr]).filter(cb => cb.checked).map(cb => cb.value);
-        if (checkedBoxes.length && !checkedBoxes.includes(featureVal)) visible = false;
+        if (checkedBoxes.length > 0 && !checkedBoxes.includes(featureVal)) visible = false;
       }
+
       if (cfg.type === 'boolean') {
-        const valTrue = inputs[cfg.attr].true.checked;
-        const valFalse = inputs[cfg.attr].false.checked;
-        if ((valTrue && featureVal !== 1) && !(valFalse && featureVal !== 0) && !(valTrue || valFalse)) {
-          visible = false;
-        }
-        if (valTrue && featureVal !== 1 && valFalse && featureVal !== 0) visible = false;
-        if (!valTrue && !valFalse) visible = true; // keine Auswahl = alle zeigen
+        const checkedTrue = inputs[cfg.attr].true.checked;
+        const checkedFalse = inputs[cfg.attr].false.checked;
+
+        if (!checkedTrue && !checkedFalse) return; // keine Auswahl = alles sichtbar
+
+        if (featureVal === 1 && !checkedTrue) visible = false;
+        if (featureVal === 0 && !checkedFalse) visible = false;
       }
+
       if (cfg.type === 'range') {
         const min = Number(inputs[cfg.attr].min.value);
         const max = Number(inputs[cfg.attr].max.value);
