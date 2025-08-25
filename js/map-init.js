@@ -56,6 +56,6 @@ overlay = new ol.Overlay({
 
 map.addOverlay(overlay);
 
-// --- Filter importieren ---
-import './filters.js';
+// Filter initialisieren
 initFilters(geojsonSource, vectorLayer);
+
