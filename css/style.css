@@ -22,4 +22,10 @@
   padding: 5px;
   border: 1px solid black;
 }
+.filter-options label {
+  display: inline-block;
+  margin-right: 10px;
+}
+
+
 
