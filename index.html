@@ -17,7 +17,23 @@
   <div id="map"></div>
   <div id="filters"></div>
 </div>
+<div id="slider-distance"></div>
+<div id="slider-hikingtime"></div>
 
+<script src="./js/range-slider.js"></script>
+<script>
+  // Distance-Slider (0–50 km, Schritte in km)
+  createRangeSlider("slider-distance", 0, 50, 1, (range) => {
+    console.log("Distance:", range.min, "-", range.max);
+    // hier rufst du später applyFilters() auf
+  });
+
+  // Hiking Time (0–600 Minuten, Schritte in 10 min)
+  createRangeSlider("slider-hikingtime", 0, 1000, 10, (range) => {
+    console.log("Time (min):", range.min, "-", range.max);
+    // später in applyFilters() => convert to hh:mm
+  });
+</script>
 
 
 <!-- Eigene JS Dateien -->
@@ -27,7 +43,7 @@
 <script src="./js/firebase-points.js"></script>
 <script src="./js/form-popup.js"></script>
 <script src="./js/popup-handler.js"></script>
-<script src="./js/filters.js"></script>
+
   
 
 <script>
@@ -36,6 +52,7 @@
 </script>
 </body>
 </html>
+
 
 
 
