@@ -1,5 +1,13 @@
 // js/filters.js
 
+// Hilfsfunktion: Minuten → hh:mm
+function minutesToHHMM(minutes) {
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  return `${h.toString().padStart(2,'0')}:${m.toString().padStart(2,'0')}`;
+}
+
+// Globale Funktion
 function initFilters(source, layer) {
   const filterContainer = document.getElementById('filters');
   if (!filterContainer) return;
@@ -10,14 +18,14 @@ function initFilters(source, layer) {
     const features = source.getFeatures();
     if (!features.length) return;
 
+    // ---- Config für alle Filter ----
     const filtersConfig = [
-      { attr: 'category', type: 'string', options: [...new Set(features.map(f => f.get('category')))] },
-      { attr: 'year_of_publication', type: 'string', options: [...new Set(features.map(f => f.get('year_of_publication')))].sort() },
-      { attr: 'physical_demand', type: 'string', options: [...new Set(features.map(f => f.get('physical_demand')))] },
+      { attr: 'category', type: 'checkbox', options: [...new Set(features.map(f => f.get('category')))] },
+      { attr: 'physical_demand', type: 'checkbox', options: [...new Set(features.map(f => f.get('physical_demand')))] },
       { attr: 'active', type: 'boolean' },
       { attr: 'listed', type: 'boolean' },
-      { attr: 'hiking_time', type: 'number' },
-      { attr: 'distance', type: 'number' }
+      { attr: 'hiking_time', type: 'range' },
+      { attr: 'distance', type: 'range' }
     ];
 
     const inputs = {};
@@ -29,44 +37,101 @@ function initFilters(source, layer) {
       label.style.marginTop = '10px';
       filterContainer.appendChild(label);
 
-      let input;
+      let inputContainer;
 
-      if (cfg.type === 'string') {
-        input = document.createElement('select');
-        input.innerHTML = `<option value="">Alle</option>` +
-          cfg.options.map(v => `<option value="${v}">${v}</option>`).join('');
+      if (cfg.type === 'checkbox') {
+        inputContainer = document.createElement('div');
+        inputContainer.className = 'filter-options';
+        cfg.options.forEach(opt => {
+          const optLabel = document.createElement('label');
+          optLabel.style.marginRight = '10px';
+          const cb = document.createElement('input');
+          cb.type = 'checkbox';
+          cb.value = opt;
+          cb.addEventListener('change', () => applyFilters(source, layer, inputs, filtersConfig));
+          optLabel.appendChild(cb);
+          optLabel.appendChild(document.createTextNode(opt));
+          inputContainer.appendChild(optLabel);
+        });
       } else if (cfg.type === 'boolean') {
-        input = document.createElement('input');
-        input.type = 'checkbox';
-      } else if (cfg.type === 'number') {
+        inputContainer = document.createElement('div');
+        const trueLabel = document.createElement('label');
+        trueLabel.style.marginRight = '10px';
+        const cbTrue = document.createElement('input');
+        cbTrue.type = 'checkbox';
+        cbTrue.value = '1';
+        cbTrue.addEventListener('change', () => applyFilters(source, layer, inputs, filtersConfig));
+        trueLabel.appendChild(cbTrue);
+        trueLabel.appendChild(document.createTextNode('true'));
+        const falseLabel = document.createElement('label');
+        const cbFalse = document.createElement('input');
+        cbFalse.type = 'checkbox';
+        cbFalse.value = '0';
+        cbFalse.addEventListener('change', () => applyFilters(source, layer, inputs, filtersConfig));
+        falseLabel.appendChild(cbFalse);
+        falseLabel.appendChild(document.createTextNode('false'));
+        inputContainer.appendChild(trueLabel);
+        inputContainer.appendChild(falseLabel);
+        inputs[cfg.attr] = { true: cbTrue, false: cbFalse };
+      } else if (cfg.type === 'range') {
         const values = features.map(f => f.get(cfg.attr)).filter(v => v != null);
         const min = Math.min(...values);
         const max = Math.max(...values);
 
-        input = document.createElement('input');
-        input.type = 'range';
-        input.min = min;
-        input.max = max;
-        input.value = max;
-        input.style.width = '100%';
+        const minInput = document.createElement('input');
+        minInput.type = 'range';
+        minInput.min = min;
+        minInput.max = max;
+        minInput.value = min;
+        minInput.style.width = '45%';
 
-        const valLabel = document.createElement('span');
-        valLabel.textContent = max;
-        input.addEventListener('input', () => valLabel.textContent = input.value);
-        label.appendChild(document.createElement('br'));
-        label.appendChild(valLabel);
+        const maxInput = document.createElement('input');
+        maxInput.type = 'range';
+        maxInput.min = min;
+        maxInput.max = max;
+        maxInput.value = max;
+        maxInput.style.width = '45%';
+        maxInput.style.marginLeft = '5%';
+
+        const minLabel = document.createElement('span');
+        const maxLabel = document.createElement('span');
+
+        if (cfg.attr === 'hiking_time') {
+          minLabel.textContent = minutesToHHMM(minInput.value);
+          maxLabel.textContent = minutesToHHMM(maxInput.value);
+        } else {
+          minLabel.textContent = minInput.value;
+          maxLabel.textContent = maxInput.value;
+        }
+
+        minInput.addEventListener('input', () => {
+          minLabel.textContent = cfg.attr === 'hiking_time' ? minutesToHHMM(minInput.value) : minInput.value;
+          applyFilters(source, layer, inputs, filtersConfig);
+        });
+        maxInput.addEventListener('input', () => {
+          maxLabel.textContent = cfg.attr === 'hiking_time' ? minutesToHHMM(maxInput.value) : maxInput.value;
+          applyFilters(source, layer, inputs, filtersConfig);
+        });
+
+        const rangeContainer = document.createElement('div');
+        rangeContainer.appendChild(minInput);
+        rangeContainer.appendChild(maxInput);
+        rangeContainer.appendChild(document.createElement('br'));
+        rangeContainer.appendChild(minLabel);
+        rangeContainer.appendChild(document.createTextNode(' - '));
+        rangeContainer.appendChild(maxLabel);
+
+        inputContainer = rangeContainer;
+        inputs[cfg.attr] = { min: minInput, max: maxInput };
       }
 
-      input.addEventListener('change', () => applyFilters(source, layer, inputs, filtersConfig));
-      filterContainer.appendChild(input);
-      inputs[cfg.attr] = input;
+      filterContainer.appendChild(inputContainer);
+      if (cfg.type === 'checkbox') inputs[cfg.attr] = inputContainer.querySelectorAll('input[type=checkbox]');
     });
   });
 }
 
-// global verfügbar machen
-window.initFilters = initFilters;
-
+// Filter anwenden
 function applyFilters(source, layer, inputs, config) {
   const features = source.getFeatures();
 
@@ -74,19 +139,31 @@ function applyFilters(source, layer, inputs, config) {
     let visible = true;
 
     config.forEach(cfg => {
-      const val = inputs[cfg.attr].value;
       const featureVal = f.get(cfg.attr);
 
-      if (cfg.type === 'string' && val && featureVal !== val) visible = false;
-      if (cfg.type === 'boolean') {
-        const checked = inputs[cfg.attr].checked;
-        if (checked && !featureVal) visible = false;
+      if (cfg.type === 'checkbox') {
+        const checkedBoxes = Array.from(inputs[cfg.attr]).filter(cb => cb.checked).map(cb => cb.value);
+        if (checkedBoxes.length && !checkedBoxes.includes(featureVal)) visible = false;
       }
-      if (cfg.type === 'number' && val) {
-        if (featureVal == null || featureVal > Number(val)) visible = false;
+      if (cfg.type === 'boolean') {
+        const valTrue = inputs[cfg.attr].true.checked;
+        const valFalse = inputs[cfg.attr].false.checked;
+        if ((valTrue && featureVal !== 1) && !(valFalse && featureVal !== 0) && !(valTrue || valFalse)) {
+          visible = false;
+        }
+        if (valTrue && featureVal !== 1 && valFalse && featureVal !== 0) visible = false;
+        if (!valTrue && !valFalse) visible = true; // keine Auswahl = alle zeigen
+      }
+      if (cfg.type === 'range') {
+        const min = Number(inputs[cfg.attr].min.value);
+        const max = Number(inputs[cfg.attr].max.value);
+        if (featureVal == null || featureVal < min || featureVal > max) visible = false;
       }
     });
 
     f.setStyle(visible ? layer.getStyle() : null);
   });
 }
+
+// global verfügbar machen
+window.initFilters = initFilters;
