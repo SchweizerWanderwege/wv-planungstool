@@ -16,7 +16,7 @@ vectorLayer = new ol.layer.Vector({
 
 // Load GeoJSON data as a vector source
 const geojsonSource = new ol.source.Vector({
-  url: '/data/wv-export.geojson',
+  url: 'wv-planungstool/data/wv-export.geojson',
   format: new ol.format.GeoJSON()
 });
 
@@ -57,6 +57,7 @@ overlay = new ol.Overlay({
 });
 
 map.addOverlay(overlay);
+
 
 
 
