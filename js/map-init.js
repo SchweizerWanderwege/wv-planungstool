@@ -14,6 +14,27 @@ vectorLayer = new ol.layer.Vector({
   })
 });
 
+// Load GeoJSON data as a vector source
+const geojsonSource = new ol.source.Vector({
+  url: '/data/wv-export.geojson',
+  format: new ol.format.GeoJSON()
+});
+
+// Create a new vector layer with red line style
+const geojsonLayer = new ol.layer.Vector({
+  source: geojsonSource,
+  style: new ol.style.Style({
+    stroke: new ol.style.Stroke({
+      color: 'red',
+      width: 2
+    })
+  })
+});
+
+// Add the new layer to the map (after the base and before overlays)
+map.addLayer(geojsonLayer);
+
+
 // Map
 map = new ol.Map({
   target: 'map',
@@ -39,3 +60,4 @@ overlay = new ol.Overlay({
 });
 
 map.addOverlay(overlay);
+
