@@ -1,7 +1,6 @@
 // js/filters.js
 
-export function initFilters(source, layer) {
-  // HTML-Container für Filter
+function initFilters(source, layer) {
   const filterContainer = document.getElementById('filters');
   if (!filterContainer) return;
 
@@ -11,7 +10,6 @@ export function initFilters(source, layer) {
     const features = source.getFeatures();
     if (!features.length) return;
 
-    // ---- Attribute definieren ----
     const filtersConfig = [
       { attr: 'category', type: 'string', options: [...new Set(features.map(f => f.get('category')))] },
       { attr: 'year_of_publication', type: 'string', options: [...new Set(features.map(f => f.get('year_of_publication')))].sort() },
@@ -52,7 +50,6 @@ export function initFilters(source, layer) {
         input.value = max;
         input.style.width = '100%';
 
-        // Anzeige für aktuellen Wert
         const valLabel = document.createElement('span');
         valLabel.textContent = max;
         input.addEventListener('input', () => valLabel.textContent = input.value);
@@ -66,6 +63,9 @@ export function initFilters(source, layer) {
     });
   });
 }
+
+// global verfügbar machen
+window.initFilters = initFilters;
 
 function applyFilters(source, layer, inputs, config) {
   const features = source.getFeatures();
@@ -82,7 +82,9 @@ function applyFilters(source, layer, inputs, config) {
         const checked = inputs[cfg.attr].checked;
         if (checked && !featureVal) visible = false;
       }
-      if (cfg.type === 'number' && val && featureVal > Number(val)) visible = false;
+      if (cfg.type === 'number' && val) {
+        if (featureVal == null || featureVal > Number(val)) visible = false;
+      }
     });
 
     f.setStyle(visible ? layer.getStyle() : null);
