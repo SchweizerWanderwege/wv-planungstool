@@ -1,9 +1,25 @@
+/* Eltern-Container für Karte + Filter */
+#map-container {
+  display: flex;          /* Karte und Filter nebeneinander */
+  height: 100vh;          /* volle Höhe */
+}
+
+/* Karte links */
 #map {
-  width: 100%;
-  height: 100vh;
+  flex: 1;                /* nimmt den verbleibenden Platz ein */
+  height: 100%;
+}
+
+/* Filter rechts */
+#filters {
+  width: 300px;           /* feste Breite */
+  padding: 10px;
+  overflow-y: auto;       /* scrollbar, falls viele Filter */
+  background-color: #fff;
 }
 .popup {
   background: white;
   padding: 5px;
   border: 1px solid black;
 }
+
